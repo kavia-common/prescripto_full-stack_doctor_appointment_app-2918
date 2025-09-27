@@ -9,7 +9,19 @@ import stripe from "stripe";
 import razorpay from 'razorpay';
 
 // Gateway Initialize
-const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY)
+// Initialize Stripe instance securely from env with validation and helpful logging
+let stripeInstance;
+if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("[Config] STRIPE_SECRET_KEY is not set. Stripe payments will be unavailable.");
+} else {
+    try {
+        stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
+        console.log("[Config] Stripe initialized successfully");
+    } catch (err) {
+        console.error("[Config] Failed to initialize Stripe:", err?.message || err);
+    }
+}
+
 const razorpayInstance = new razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -283,12 +295,34 @@ const verifyRazorpay = async (req, res) => {
     }
 }
 
-// API to make payment of appointment using Stripe
+/**
+ * PUBLIC_INTERFACE
+ * Create a Stripe Checkout session for an appointment.
+ * Requires:
+ * - req.body.appointmentId: string
+ * - process.env.STRIPE_SECRET_KEY: string (Stripe secret)
+ * - process.env.CURRENCY: ISO currency (e.g., INR, USD)
+ * Responds with { success, session_url } or an error if misconfigured.
+ */
 const paymentStripe = async (req, res) => {
     try {
+        if (!stripeInstance) {
+            return res.status(500).json({
+                success: false,
+                message: "Stripe is not configured on the server. Please set STRIPE_SECRET_KEY."
+            });
+        }
 
         const { appointmentId } = req.body
         const { origin } = req.headers
+
+        if (!origin) {
+            return res.status(400).json({ success: false, message: "Missing Origin header" });
+        }
+        if (!process.env.CURRENCY) {
+            console.error("[Config] CURRENCY env variable not set");
+            return res.status(500).json({ success: false, message: "Server payment configuration missing (CURRENCY)" });
+        }
 
         const appointmentData = await appointmentModel.findById(appointmentId)
 
@@ -296,7 +330,7 @@ const paymentStripe = async (req, res) => {
             return res.json({ success: false, message: 'Appointment Cancelled or not found' })
         }
 
-        const currency = process.env.CURRENCY.toLocaleLowerCase()
+        const currency = String(process.env.CURRENCY).toLowerCase()
 
         const line_items = [{
             price_data: {
@@ -320,7 +354,7 @@ const paymentStripe = async (req, res) => {
 
     } catch (error) {
         console.log(error)
-        res.json({ success: false, message: error.message })
+        res.status(500).json({ success: false, message: error.message || "Stripe payment failed" })
     }
 }
 

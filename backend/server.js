@@ -28,6 +28,11 @@ console.log(`[Startup] Using PORT=${port}`);
 if (process.env.MONGODB_URI) console.log("[Startup] MONGODB_URI provided");
 if (process.env.DB_NAME) console.log(`[Startup] DB_NAME=${process.env.DB_NAME}`);
 if (process.env.CLOUDINARY_NAME) console.log("[Startup] Cloudinary vars present");
+if (process.env.STRIPE_SECRET_KEY) {
+  console.log("[Startup] Stripe secret configured");
+} else {
+  console.warn("[Startup] STRIPE_SECRET_KEY not configured - Stripe payments will be disabled");
+}
 
 // health/readiness endpoint
 // PUBLIC_INTERFACE
