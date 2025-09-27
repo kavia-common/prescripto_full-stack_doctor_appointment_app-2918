@@ -12,6 +12,10 @@ const connectDB = async (maxRetries = 5, delayMs = 2000) => {
   const baseUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017";
   const dbName = process.env.DB_NAME || "prescripto";
 
+  if (!process.env.MONGODB_URI) {
+    console.warn("MONGODB_URI not set; attempting to connect to local MongoDB at 127.0.0.1:27017");
+  }
+
   // Attach listeners once
   if (mongoose.connection.listeners("connected").length === 0) {
     mongoose.connection.on("connected", () => {
