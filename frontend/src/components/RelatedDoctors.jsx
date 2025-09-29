@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
+import PropTypes from 'prop-types'
+
 const RelatedDoctors = ({ speciality, docId }) => {
 
     const navigate = useNavigate()
@@ -36,6 +38,11 @@ const RelatedDoctors = ({ speciality, docId }) => {
             {/* <button className='bg-[#EAEFFF] text-gray-600 px-12 py-3 rounded-full mt-10'>more</button> */}
         </div>
     )
+}
+
+RelatedDoctors.propTypes = {
+  speciality: PropTypes.string.isRequired,
+  docId: PropTypes.string,
 }
 
 export default RelatedDoctors

@@ -53,7 +53,9 @@ const AppContextProvider = (props) => {
     }
 
     useEffect(() => {
+        // Fetch doctors on mount
         getDoctosData()
+        // getDoctosData is stable across renders in this context
     }, [])
 
     useEffect(() => {
