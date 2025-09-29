@@ -21,6 +21,9 @@ module.exports = [
         console: 'readonly',
         // Vite import.meta
         import: 'readonly',
+        // Common Web APIs used in code
+        FormData: 'readonly',
+        URL: 'readonly',
       },
       parserOptions: {
         ecmaFeatures: {
