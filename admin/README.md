@@ -1,8 +1,29 @@
-# React + Vite
+# Admin - Prescripto
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite based admin dashboard for managing doctors, appointments and analytics.
 
-Currently, two official plugins are available:
+## Getting started
+- Install dependencies: `npm install`
+- Run dev server: `npm run dev`
+- Build: `npm run build`
+- Preview: `npm run preview`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Testing (Jest + React Testing Library)
+We use Jest and React Testing Library (RTL) for unit and integration tests.
+
+- Config: package.json -> `jest` section
+- Setup file: `src/tests/setup/jest.setup.js`
+- Test utilities: `src/tests/utils/test-utils.jsx` (wraps components with Router and Context providers)
+
+Scripts:
+- Run all tests: `npm test`
+- Watch mode: `npm run test:watch`
+- Coverage: `npm run test:coverage`
+
+Test locations:
+- Unit tests: `src/**/__tests__/*.unit.test.jsx`
+- Integration tests: `src/**/__tests__/*.integration.test.jsx`
+
+Notes:
+- Tests mock network calls and localStorage where necessary.
+- Environment variables used in the app are given safe defaults in the setup file.
