@@ -1,4 +1,15 @@
-# Backend (Express) - Environment and Payments Configuration
+# Backend
+
+## Testing
+We use Jest + Supertest for unit and integration tests.
+
+- Install dependencies:
+  npm install
+
+- Run tests:
+  npm test
+
+See TESTING.md for more details. (Express) - Environment and Payments Configuration
 
 This backend powers the Prescripto doctor appointment application.
 

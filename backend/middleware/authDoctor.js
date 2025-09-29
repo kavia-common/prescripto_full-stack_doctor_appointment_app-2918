@@ -1,18 +1,25 @@
 import jwt from 'jsonwebtoken'
 
-// doctor authentication middleware
+/**
+ * PUBLIC_INTERFACE
+ * authDoctor
+ * Validate a doctor JWT from `token` header and attach doctorId to req.body.
+ * Responds with 401 when token is missing/invalid.
+ */
 const authDoctor = async (req, res, next) => {
-  const { dtoken } = req.headers
-  if (!dtoken) {
-    return res.json({ success: false, message: 'Not Authorized Login Again' })
+  const { token, dtoken } = req.headers
+  const useToken = token || dtoken
+  if (!useToken) {
+    return res.status(401).json({ success: false, message: 'Not Authorized Login Again' })
   }
   try {
-    const tokenDecoded = jwt.verify(dtoken, process.env.JWT_SECRET)
-    req.body.docId = tokenDecoded.id
+    const secret = process.env.REACT_APP_JWT_SECRET || process.env.JWT_SECRET
+    const tokenDecoded = jwt.verify(useToken, secret)
+    req.body.doctorId = tokenDecoded.id
     next()
   } catch (error) {
     console.log(error)
-    res.json({ success: false, message: error.message })
+    res.status(401).json({ success: false, message: error.message })
   }
 }
 

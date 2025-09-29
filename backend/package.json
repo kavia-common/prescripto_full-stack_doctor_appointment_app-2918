@@ -7,7 +7,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "lint": "eslint . --ext .js"
+    "lint": "eslint . --ext .js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
   },
   "author": "",
   "license": "ISC",
@@ -34,6 +37,31 @@
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^7.2.1",
     "nodemon": "^3.1.4",
-    "promise": "^8.3.0"
+    "promise": "^8.3.0",
+    "@types/jest": "^29.5.12",
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {},
+    "roots": [
+      "<rootDir>/tests"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "setupFiles": [
+      "<rootDir>/tests/setup/setEnv.js"
+    ],
+    "collectCoverageFrom": [
+      "controllers/**/*.js",
+      "middleware/**/*.js",
+      "routes/**/*.js",
+      "!**/node_modules/**"
+    ],
+    "coverageDirectory": "coverage"
   }
 }
