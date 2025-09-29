@@ -1,0 +1,136 @@
+version: "1.0"
+name: prescripto_full-stack_doctor_appointment_app-2918
+description: Full-stack MERN application for doctor appointment booking with patient, doctor, and admin roles, integrated payments, and dashboards.
+
+services:
+  backend:
+    type: node
+    root: backend
+    # Use production start; ensure server binds to 0.0.0.0
+    command: npm start
+    env:
+      # Server
+      - name: PORT
+        value: "3001"
+      - name: CORS_ORIGIN
+        # Frontend and Admin SPA hosts
+        value: "http://localhost:5173,http://localhost:5174"
+
+      # Database (server-only)
+      - name: MONGODB_URI
+        from_env: MONGODB_URI
+      - name: DB_NAME
+        value: "prescripto"
+
+      # JWT (server-only)
+      - name: JWT_SECRET
+        from_env: JWT_SECRET
+
+      # Cloudinary (server-only)
+      - name: CLOUDINARY_NAME
+        from_env: CLOUDINARY_NAME
+      - name: CLOUDINARY_API_KEY
+        from_env: CLOUDINARY_API_KEY
+      - name: CLOUDINARY_API_SECRET
+        from_env: CLOUDINARY_API_SECRET
+
+      # Payments (server-only)
+      - name: CURRENCY
+        value: "INR"
+      - name: STRIPE_SECRET_KEY
+        from_env: STRIPE_SECRET_KEY
+      - name: RAZORPAY_KEY_ID
+        from_env: RAZORPAY_KEY_ID
+      - name: RAZORPAY_KEY_SECRET
+        from_env: RAZORPAY_KEY_SECRET
+
+      # Admin bootstrap (server-only)
+      - name: ADMIN_EMAIL
+        from_env: ADMIN_EMAIL
+      - name: ADMIN_PASSWORD
+        from_env: ADMIN_PASSWORD
+
+    ports:
+      - 3001:3001
+    healthcheck:
+      # server exposes GET /healthz returning service/db status per backend README
+      path: /healthz
+      method: GET
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+    routes:
+      - path: /api
+        target_port: 3001
+      - path: /healthz
+        target_port: 3001
+
+  frontend:
+    type: node
+    root: frontend
+    # Vite dev server; port 5173 per requirement
+    command: npm run dev
+    env:
+      # Vite only exposes variables prefixed with VITE_
+      # Map provided client envs to Vite convention (do NOT expose secrets that belong to server)
+      - name: VITE_API_URL
+        value: http://localhost:3001
+      - name: VITE_STRIPE_API_KEY
+        from_env: REACT_APP_STRIPE_API_KEY
+      - name: VITE_RAZORPAY_API_KEY
+        from_env: REACT_APP_RAZORPAY_API_KEY
+
+      # The following were listed in container_env but are server secrets. Do not expose:
+      # REACT_APP_MONGO_URI, REACT_APP_JWT_SECRET -> intentionally not set in client
+
+      # Ensure Vite binds correctly in some environments
+      - name: VITE_HOST
+        value: 0.0.0.0
+      - name: PORT
+        value: "5173"
+
+    ports:
+      - 5173:5173
+    routes:
+      - path: /
+        target_port: 5173
+
+    depends_on:
+      - backend
+
+  admin:
+    type: node
+    root: admin
+    # Vite dev server for admin dashboard; port 5174 per requirement
+    command: npm run dev
+    env:
+      - name: VITE_API_URL
+        value: http://localhost:3001
+      - name: VITE_STRIPE_API_KEY
+        from_env: REACT_APP_STRIPE_API_KEY
+      - name: VITE_RAZORPAY_API_KEY
+        from_env: REACT_APP_RAZORPAY_API_KEY
+
+      # Ensure Vite binds correctly
+      - name: VITE_HOST
+        value: 0.0.0.0
+      - name: PORT
+        value: "5174"
+
+    ports:
+      - 5174:5174
+    routes:
+      - path: /admin
+        target_port: 5174
+        strip_path: false
+
+    depends_on:
+      - backend
+
+# Notes:
+# - Client env vars are Vite-prefixed (VITE_*) and contain only public keys or URLs.
+# - Secure server secrets are only present in backend env.
+# - Health check path /healthz is configured for backend.
+# - Distinct ports per SPA: frontend 5173, admin 5174.
+# - Routes ensure API and health paths go to backend; SPA routes go to respective Vite servers.
